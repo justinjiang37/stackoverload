@@ -13,6 +13,9 @@ export interface Project {
   stars: number;
   language: string;
   owner: string;
+  url?: string;
+  forks?: number;
+  openIssues?: number;
 }
 
 export const mockUser: User = {

@@ -15,26 +15,33 @@ function formatStars(stars: number): string {
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
+  const CardWrapper = project.url ? "a" : "div";
+  const linkProps = project.url
+    ? { href: project.url, target: "_blank", rel: "noopener noreferrer" }
+    : {};
+
   return (
     <Card className="hover:border-primary/50 transition-colors">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-muted-foreground text-sm">{project.owner}</p>
-            <CardTitle className="text-lg">{project.name}</CardTitle>
+      <CardWrapper {...linkProps} className="block">
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm">{project.owner}</p>
+              <CardTitle className="text-lg">{project.name}</CardTitle>
+            </div>
+            <Badge variant="secondary">{project.language}</Badge>
           </div>
-          <Badge variant="secondary">{project.language}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
-          {project.description}
-        </p>
-        <div className="flex items-center gap-1 text-sm">
-          <Star className="size-4" />
-          <span>{formatStars(project.stars)}</span>
-        </div>
-      </CardContent>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
+            {project.description}
+          </p>
+          <div className="flex items-center gap-1 text-sm">
+            <Star className="size-4" />
+            <span>{formatStars(project.stars)}</span>
+          </div>
+        </CardContent>
+      </CardWrapper>
     </Card>
   );
 }
