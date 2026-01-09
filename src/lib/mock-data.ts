@@ -13,6 +13,8 @@ export interface Project {
   stars: number;
   language: string;
   owner: string;
+  ownerAvatarUrl: string;
+  lastCommitDate: string;
   url?: string;
   forks?: number;
   openIssues?: number;
@@ -34,6 +36,8 @@ export const mockProjects: Project[] = [
     stars: 225000,
     language: "JavaScript",
     owner: "facebook",
+    ownerAvatarUrl: "https://avatars.githubusercontent.com/u/69631?v=4",
+    lastCommitDate: "2024-01-15T10:30:00Z",
   },
   {
     id: "2",
@@ -42,6 +46,8 @@ export const mockProjects: Project[] = [
     stars: 120000,
     language: "TypeScript",
     owner: "vercel",
+    ownerAvatarUrl: "https://avatars.githubusercontent.com/u/14985020?v=4",
+    lastCommitDate: "2024-01-14T08:45:00Z",
   },
   {
     id: "3",
@@ -50,6 +56,8 @@ export const mockProjects: Project[] = [
     stars: 78000,
     language: "CSS",
     owner: "tailwindlabs",
+    ownerAvatarUrl: "https://avatars.githubusercontent.com/u/67109815?v=4",
+    lastCommitDate: "2024-01-13T14:20:00Z",
   },
   {
     id: "4",
@@ -58,6 +66,8 @@ export const mockProjects: Project[] = [
     stars: 160000,
     language: "TypeScript",
     owner: "microsoft",
+    ownerAvatarUrl: "https://avatars.githubusercontent.com/u/6154722?v=4",
+    lastCommitDate: "2024-01-15T12:00:00Z",
   },
   {
     id: "5",
@@ -66,6 +76,8 @@ export const mockProjects: Project[] = [
     stars: 92000,
     language: "Rust",
     owner: "rust-lang",
+    ownerAvatarUrl: "https://avatars.githubusercontent.com/u/5430905?v=4",
+    lastCommitDate: "2024-01-12T16:30:00Z",
   },
   {
     id: "6",
@@ -74,5 +86,7 @@ export const mockProjects: Project[] = [
     stars: 93000,
     language: "Rust",
     owner: "denoland",
+    ownerAvatarUrl: "https://avatars.githubusercontent.com/u/42048915?v=4",
+    lastCommitDate: "2024-01-11T09:15:00Z",
   },
 ];
