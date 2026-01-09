@@ -1,4 +1,3 @@
-## StackOverload
-StackOverload is a project to help university students determine if their registered course load is actually do-able. Furthermore, given past courses and semester GPAs, StackOverload can determine how much your GPA will drop/improve. All course "difficulties" will be determined via scraping Reddit for past student's sentiments towards the course content.
+## open-source-analyzer
+OpenSource Analyzer is a web application that helps developers and students understand, evaluate, and contribute to open-source projects faster. Instead of blindly diving into a repo, analyze  project structure, activity, and signals to show whether a project is healthy, beginner-friendly, or worth your time.
 
-Currently in dev of web app. Chrome extension planned in future.
