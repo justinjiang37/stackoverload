@@ -20,6 +20,26 @@ export interface Project {
   openIssues?: number;
 }
 
+export interface AlivenessMetrics {
+  daysSinceLastCommit: number;
+  commitVelocity: {
+    week: number;
+    month: number;
+    quarter: number;
+  };
+  busFactor: {
+    top1Percent: number;
+    top3Percent: number;
+  };
+  releaseCadence: number | null; // avg days between releases, null if no releases
+  issueChurn: {
+    opened30: number;
+    closed30: number;
+    opened90: number;
+    closed90: number;
+  };
+}
+
 export const mockUser: User = {
   id: "1",
   name: "Jane Developer",

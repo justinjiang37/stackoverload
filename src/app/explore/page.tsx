@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Search } from "lucide-react";
 import { ProjectCard } from "@/components/project-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,23 +10,33 @@ export default function ExplorePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    async function fetchProjects() {
-      try {
-        const res = await fetch("/api/projects");
-        if (!res.ok) throw new Error("Failed to fetch");
-        const data = await res.json();
-        setProjects(data.projects);
-      } catch (err) {
-        setError("Failed to load projects");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+  const fetchProjects = useCallback(async (search: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      if (search) params.set("search", search);
+      const res = await fetch(`/api/projects?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      setProjects(data.projects);
+    } catch (err) {
+      setError("Failed to load projects");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    fetchProjects();
   }, []);
+
+  // Debounced search (also handles initial fetch)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchProjects(searchQuery);
+    }, searchQuery ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [searchQuery, fetchProjects]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -48,6 +58,8 @@ export default function ExplorePage() {
             <input
               type="search"
               placeholder="Search projects by name, language, or topic..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-12 pl-12 pr-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-base text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-all duration-200 outline-none focus:border-blue-600 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-600/10 dark:focus:ring-blue-400/10"
             />
           </div>
