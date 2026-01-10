@@ -40,6 +40,19 @@ export interface AlivenessMetrics {
   };
 }
 
+export interface ContributionOutcomesMetrics {
+  prAcceptanceRate: number; // percentage of PRs merged vs closed
+  timeToFirstResponse: number | null; // avg hours until first maintainer response
+  timeToMerge: number | null; // avg hours from open to merge
+  externalContributorShare: number; // percentage of PRs from non-maintainers
+  closedWithoutMergeRate: number; // percentage of PRs closed without merge
+  totalPRs: {
+    merged: number;
+    closed: number;
+    open: number;
+  };
+}
+
 export const mockUser: User = {
   id: "1",
   name: "Jane Developer",

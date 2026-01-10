@@ -1,16 +1,26 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Search } from "lucide-react";
 import { ProjectCard } from "@/components/project-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Project } from "@/lib/mock-data";
+
+// Prefetch insights for a project (fire-and-forget, warms cache)
+function prefetchInsights(owner: string, repo: string) {
+  fetch(`/api/projects/${owner}/${repo}/insights`, {
+    priority: "low",
+  } as RequestInit).catch(() => {
+    // Silently ignore prefetch errors
+  });
+}
 
 export default function ExplorePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const prefetchedRef = useRef<Set<string>>(new Set());
 
   const fetchProjects = useCallback(async (search: string) => {
     setLoading(true);
@@ -37,6 +47,26 @@ export default function ExplorePage() {
     }, searchQuery ? 300 : 0);
     return () => clearTimeout(timer);
   }, [searchQuery, fetchProjects]);
+
+  // Prefetch insights for visible projects after they load
+  useEffect(() => {
+    if (loading || projects.length === 0) return;
+
+    // Stagger prefetch requests to avoid overwhelming the API
+    const prefetchQueue = projects.filter((p) => {
+      const key = `${p.owner}/${p.name}`;
+      if (prefetchedRef.current.has(key)) return false;
+      prefetchedRef.current.add(key);
+      return true;
+    });
+
+    prefetchQueue.forEach((project, index) => {
+      // Stagger requests by 200ms each to avoid rate limiting
+      setTimeout(() => {
+        prefetchInsights(project.owner, project.name);
+      }, index * 200);
+    });
+  }, [projects, loading]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

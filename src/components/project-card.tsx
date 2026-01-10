@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Star, GitCommit, ChevronDown, Clock, Activity, Users, Tag, GitPullRequest } from "lucide-react";
+import { Star, GitCommit, ChevronDown, Clock, Activity, Users, Tag, GitPullRequest, CheckCircle2, MessageSquare, Timer, UserPlus, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Project, AlivenessMetrics } from "@/lib/mock-data";
+import { Project, AlivenessMetrics, ContributionOutcomesMetrics } from "@/lib/mock-data";
 import Image from "next/image";
 
 interface ProjectCardProps {
@@ -54,9 +54,46 @@ function getBusFactorColor(percent: number): string {
   return "text-green-600 dark:text-green-400"; // Healthy distribution
 }
 
+function getAcceptanceRateColor(percent: number): string {
+  if (percent >= 70) return "text-green-600 dark:text-green-400";
+  if (percent >= 40) return "text-yellow-600 dark:text-yellow-400";
+  return "text-red-600 dark:text-red-400";
+}
+
+function getResponseTimeColor(hours: number): string {
+  if (hours <= 24) return "text-green-600 dark:text-green-400"; // Within a day
+  if (hours <= 72) return "text-yellow-600 dark:text-yellow-400"; // Within 3 days
+  return "text-red-600 dark:text-red-400"; // Slow response
+}
+
+function getMergeTimeColor(hours: number): string {
+  if (hours <= 48) return "text-green-600 dark:text-green-400"; // Within 2 days
+  if (hours <= 168) return "text-yellow-600 dark:text-yellow-400"; // Within a week
+  return "text-red-600 dark:text-red-400"; // Slow merge
+}
+
+function getExternalShareColor(percent: number): string {
+  if (percent >= 30) return "text-green-600 dark:text-green-400"; // Healthy external contributions
+  if (percent >= 10) return "text-yellow-600 dark:text-yellow-400";
+  return "text-gray-600 dark:text-gray-400"; // Mostly internal
+}
+
+function getClosedWithoutMergeColor(percent: number): string {
+  if (percent <= 20) return "text-green-600 dark:text-green-400"; // Low rejection
+  if (percent <= 40) return "text-yellow-600 dark:text-yellow-400";
+  return "text-red-600 dark:text-red-400"; // High rejection
+}
+
+function formatHoursToReadable(hours: number): string {
+  if (hours < 24) return `${hours}h`;
+  const days = Math.round(hours / 24);
+  return `${days}d`;
+}
+
 export function ProjectCard({ project }: ProjectCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [aliveness, setAliveness] = useState<AlivenessMetrics | null>(null);
+  const [contributionOutcomes, setContributionOutcomes] = useState<ContributionOutcomesMetrics | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,11 +103,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
     if (!expanded && !aliveness && !loading) {
       setLoading(true);
       setError(null);
+
       try {
-        const res = await fetch(`/api/projects/${project.owner}/${project.name}/aliveness`);
+        // Single API call for all insights (cached for 5 min)
+        const res = await fetch(`/api/projects/${project.owner}/${project.name}/insights`);
         if (!res.ok) throw new Error("Failed to fetch");
         const data = await res.json();
-        setAliveness(data);
+        setAliveness(data.aliveness);
+        setContributionOutcomes(data.contributionOutcomes);
       } catch (err) {
         setError("Failed to load metrics");
         console.error(err);
@@ -295,6 +335,145 @@ export function ProjectCard({ project }: ProjectCardProps) {
               </div>
             </div>
           )}
+
+          {/* Contribution Outcomes Section */}
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            {/* Section Header */}
+            <div className="flex items-center gap-2 mb-4">
+              <CheckCircle2 className="size-5 text-blue-600 dark:text-blue-400" />
+              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+                Contribution Outcomes
+              </h3>
+            </div>
+
+            {loading && (
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-lg" />
+                ))}
+              </div>
+            )}
+
+            {contributionOutcomes && !loading && (
+              <div className="space-y-4">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {/* PR Acceptance Rate */}
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-medium mb-2">
+                      <CheckCircle2 className="size-3.5" />
+                      PR Acceptance
+                    </div>
+                    <div className={`font-mono text-2xl font-bold ${getAcceptanceRateColor(contributionOutcomes.prAcceptanceRate)}`}>
+                      {contributionOutcomes.prAcceptanceRate}%
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      PRs merged
+                    </div>
+                  </div>
+
+                  {/* Time to First Response */}
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-medium mb-2">
+                      <MessageSquare className="size-3.5" />
+                      First Response
+                    </div>
+                    <div className={`font-mono text-2xl font-bold ${contributionOutcomes.timeToFirstResponse !== null ? getResponseTimeColor(contributionOutcomes.timeToFirstResponse) : "text-gray-400"}`}>
+                      {contributionOutcomes.timeToFirstResponse !== null ? formatHoursToReadable(contributionOutcomes.timeToFirstResponse) : "—"}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      avg wait time
+                    </div>
+                  </div>
+
+                  {/* Time to Merge */}
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-medium mb-2">
+                      <Timer className="size-3.5" />
+                      Time to Merge
+                    </div>
+                    <div className={`font-mono text-2xl font-bold ${contributionOutcomes.timeToMerge !== null ? getMergeTimeColor(contributionOutcomes.timeToMerge) : "text-gray-400"}`}>
+                      {contributionOutcomes.timeToMerge !== null ? formatHoursToReadable(contributionOutcomes.timeToMerge) : "—"}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      avg to land
+                    </div>
+                  </div>
+
+                  {/* External Contributor Share */}
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-medium mb-2">
+                      <UserPlus className="size-3.5" />
+                      External PRs
+                    </div>
+                    <div className={`font-mono text-2xl font-bold ${getExternalShareColor(contributionOutcomes.externalContributorShare)}`}>
+                      {contributionOutcomes.externalContributorShare}%
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      from outside
+                    </div>
+                  </div>
+
+                  {/* Closed Without Merge */}
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-medium mb-2">
+                      <XCircle className="size-3.5" />
+                      Rejected
+                    </div>
+                    <div className={`font-mono text-2xl font-bold ${getClosedWithoutMergeColor(contributionOutcomes.closedWithoutMergeRate)}`}>
+                      {contributionOutcomes.closedWithoutMergeRate}%
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      closed w/o merge
+                    </div>
+                  </div>
+                </div>
+
+                {/* PR Totals */}
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-medium mb-3">
+                    <GitPullRequest className="size-3.5" />
+                    Pull Request Summary
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Merged</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-green-600 dark:text-green-400 font-mono text-lg font-semibold">
+                          {contributionOutcomes.totalPRs.merged}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          total
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Closed</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-red-600 dark:text-red-400 font-mono text-lg font-semibold">
+                          {contributionOutcomes.totalPRs.closed}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          total
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Open</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-blue-600 dark:text-blue-400 font-mono text-lg font-semibold">
+                          {contributionOutcomes.totalPRs.open}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          pending
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
           </div>
         </div>
       </div>
