@@ -4,6 +4,12 @@ export interface User {
   bio: string;
   avatarUrl: string;
   githubUsername: string;
+  primaryLanguages: string[]; // 1-3 languages, most to least familiar
+  experienceLevel: "Beginner" | "Intermediate" | "Advanced";
+  contributionGoals: string[]; // Can select multiple
+  timeBudget: "Short-term (hours → days)" | "Medium (1–2 weeks)" | "Long-term (weeks+)";
+  rejectionTolerance: "Low" | "Medium" | "High";
+  preferredContributionTypes: string[]; // Can select multiple
 }
 
 export interface Project {
@@ -59,6 +65,12 @@ export const mockUser: User = {
   bio: "Full-stack developer passionate about open source",
   avatarUrl: "https://github.com/github.png",
   githubUsername: "janedev",
+  primaryLanguages: ["JavaScript", "TypeScript", "Python"],
+  experienceLevel: "Intermediate",
+  contributionGoals: ["Learning", "Shipping features"],
+  timeBudget: "Medium (1–2 weeks)",
+  rejectionTolerance: "Medium",
+  preferredContributionTypes: ["Bug fixes", "Features", "Documentation"],
 };
 
 export const mockProjects: Project[] = [
