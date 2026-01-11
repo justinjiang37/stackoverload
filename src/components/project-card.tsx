@@ -126,63 +126,60 @@ export function ProjectCard({ project }: ProjectCardProps) {
     <div
       className={`rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-all duration-200 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 ${expanded ? "ring-2 ring-blue-500/20" : ""}`}
     >
-      {/* Main Row - Clickable */}
+      {/* Main Content - Clickable */}
       <div
         onClick={handleToggle}
-        className="flex items-center gap-4 p-4 cursor-pointer"
+        className="p-6 cursor-pointer"
       >
-        {/* Language */}
-        <div className="w-24 shrink-0">
-          <Badge variant="default" className="w-full justify-center">
+        {/* Header Row: Title + Language */}
+        <div className="flex items-center gap-3 mb-3">
+          <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-100 leading-tight">
+            {project.name}
+          </h3>
+          <Badge variant="secondary" className="text-xs shrink-0">
             {project.language}
           </Badge>
         </div>
 
-        {/* Repo name */}
-        <div className="w-40 shrink-0">
-          <span className="font-semibold text-blue-900 dark:text-blue-300 truncate block">
-            {project.name}
-          </span>
-        </div>
+        {/* Description Block - Multi-line */}
+        <p className="text-base text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+          {project.description}
+        </p>
 
-        {/* Description */}
-        <div className="flex-1 min-w-0">
-          <p className="text-gray-600 dark:text-gray-400 text-sm truncate leading-relaxed">
-            {project.description}
-          </p>
-        </div>
+        {/* Metadata Row */}
+        <div className="flex items-center gap-6 text-sm">
+          {/* Stars */}
+          <div className="flex items-center gap-1.5 font-medium">
+            <Star className="size-4 text-orange-500 fill-orange-500" />
+            <span className="text-gray-700 dark:text-gray-300 font-mono">{formatStars(project.stars)}</span>
+          </div>
 
-        {/* Stars */}
-        <div className="flex items-center gap-1.5 text-sm shrink-0 w-20 justify-end font-medium">
-          <Star className="size-4 text-orange-500 fill-orange-500" />
-          <span className="text-gray-700 dark:text-gray-300 font-mono">{formatStars(project.stars)}</span>
-        </div>
+          {/* Owner with avatar */}
+          <div className="flex items-center gap-2">
+            <Image
+              src={project.ownerAvatarUrl}
+              alt={`${project.owner}'s avatar`}
+              width={24}
+              height={24}
+              className="rounded-full ring-2 ring-gray-100 dark:ring-gray-700"
+            />
+            <span className="text-gray-600 dark:text-gray-400 truncate max-w-[120px]">
+              {project.owner}
+            </span>
+          </div>
 
-        {/* Owner with avatar */}
-        <div className="flex items-center gap-2 shrink-0 w-36">
-          <Image
-            src={project.ownerAvatarUrl}
-            alt={`${project.owner}'s avatar`}
-            width={28}
-            height={28}
-            className="rounded-full ring-2 ring-gray-100 dark:ring-gray-700"
-          />
-          <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
-            {project.owner}
-          </span>
-        </div>
+          {/* Last commit */}
+          <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+            <GitCommit className="size-4" />
+            <span className="font-mono text-xs">{formatDate(project.lastCommitDate)}</span>
+          </div>
 
-        {/* Last commit */}
-        <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 shrink-0 w-32 justify-end">
-          <GitCommit className="size-4" />
-          <span className="font-mono text-xs">{formatDate(project.lastCommitDate)}</span>
-        </div>
-
-        {/* Expand indicator */}
-        <div className="shrink-0 w-8 flex justify-center">
-          <ChevronDown
-            className={`size-5 text-gray-400 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
-          />
+          {/* Expand indicator - pushed to right */}
+          <div className="ml-auto">
+            <ChevronDown
+              className={`size-5 text-gray-400 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            />
+          </div>
         </div>
       </div>
 

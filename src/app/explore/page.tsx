@@ -102,16 +102,6 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Column Headers */}
-        <div className="hidden lg:flex items-center gap-4 px-4 py-3 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-          <div className="w-24">Language</div>
-          <div className="w-40">Repository</div>
-          <div className="flex-1">Description</div>
-          <div className="w-20 text-right">Stars</div>
-          <div className="w-36">Owner</div>
-          <div className="w-32 text-right">Last Commit</div>
-        </div>
-
         {/* Projects List */}
         <div className="flex flex-col gap-3">
           {loading
